@@ -4,7 +4,7 @@ struct State {
     player: Player,
     frame_time: f32,
     obstacle: Obstacle,
-    mode: GameMode, 
+    mode: GameMode,
     score: i32,
 }
 
@@ -29,16 +29,15 @@ impl State {
         }
     }
     fn main_menu(&mut self, ctx: &mut BTerm) {
-        // TODO 
+        // TODO
         ctx.cls();
         ctx.print_centered(5, "Welcome to Flappy Dragon");
         ctx.print_centered(8, "(P) Play Game");
         ctx.print_centered(10, "(Q) Quit Game");
         match ctx.key {
-           Some(VirtualKeyCode::P) => self.mode = GameMode::Playing,
-           Some(VirtualKeyCode::Q) => ctx.quitting = true,
-           _ => ()
-
+            Some(VirtualKeyCode::P) => self.mode = GameMode::Playing,
+            Some(VirtualKeyCode::Q) => ctx.quitting = true,
+            _ => (),
         }
     }
 
@@ -55,8 +54,8 @@ impl State {
 
         if let Some(VirtualKeyCode::Space) = ctx.key {
             self.player.flap();
-        } 
-        
+        }
+
         self.obstacle.render(ctx, self.player.x);
         self.player.render(ctx);
 
@@ -66,7 +65,8 @@ impl State {
         }
 
         if (self.player.y > SCREEN_HEIGHT
-            || self.obstacle.hit_obstacle(self.player.x, self.player.y)) {
+            || self.obstacle.hit_obstacle(self.player.x, self.player.y))
+        {
             self.mode = GameMode::End;
         }
     }
@@ -79,10 +79,9 @@ impl State {
         ctx.print_centered(12, "(P) Play Again");
         ctx.print_centered(14, "(Q) Quit Game");
         match ctx.key {
-           Some(VirtualKeyCode::P) => self.restart(ctx), 
-           Some(VirtualKeyCode::Q) => ctx.quitting = true,
-           _ => ()
-
+            Some(VirtualKeyCode::P) => self.restart(ctx),
+            Some(VirtualKeyCode::Q) => ctx.quitting = true,
+            _ => (),
         }
     }
 
@@ -102,17 +101,17 @@ struct Player {
     velocity: f32,
 }
 
-// I am a player backend, and responsible for behavior of players. 
+// I am a player backend, and responsible for behavior of players.
 impl Player {
     fn new(x: i32, y: i32) -> Self {
-        Player{
+        Player {
             x,
             y,
-            velocity: 0.0
+            velocity: 0.0,
         }
     }
 
-    fn render(&mut self, ctx:&mut BTerm) {
+    fn render(&mut self, ctx: &mut BTerm) {
         ctx.set(0, self.y, YELLOW, BLACK, to_cp437('@'));
     }
 
@@ -129,7 +128,7 @@ impl Player {
         }
     }
 
-    fn flap(&mut self){
+    fn flap(&mut self) {
         self.velocity = -2.0;
     }
 }
@@ -137,11 +136,11 @@ impl Player {
 struct Obstacle {
     x: i32,     // where this obstacle put
     gap_y: i32, // position in obstacle where has a gap
-    size: i32   // size of gap
+    size: i32,  // size of gap
 }
 
 impl Obstacle {
-    fn new(x:i32, score: i32) -> Self {
+    fn new(x: i32, score: i32) -> Self {
         let mut random = RandomNumberGenerator::new();
         Obstacle {
             x,
@@ -150,27 +149,29 @@ impl Obstacle {
         }
     }
 
-    fn render(&self, ctx:&mut BTerm, player_x:i32) {
+    fn render(&self, ctx: &mut BTerm, player_x: i32) {
         let screen_x = self.x - player_x; // player is moving, so obstacle is moving too.
-        for y in (0..self.gap_y-self.size/2) {
+        for y in (0..self.gap_y - self.size / 2) {
             ctx.set(screen_x, y, RED, BLACK, to_cp437('|'));
         }
-        for y in (self.gap_y+self.size/2 .. SCREEN_HEIGHT) {
+        for y in (self.gap_y + self.size / 2..SCREEN_HEIGHT) {
             ctx.set(screen_x, y, RED, BLACK, to_cp437('|'));
         }
     }
 
     fn hit_obstacle(&self, player_x: i32, player_y: i32) -> bool {
-        let gap_top = self.gap_y-self.size/2;
-        let gap_end = self.gap_y+self.size/2;
-        if player_x == self.x 
+        let gap_top = self.gap_y - self.size / 2;
+        let gap_end = self.gap_y + self.size / 2;
+        if player_x == self.x
             && ((player_y > 0 && player_y < gap_top)
-                ||(player_y < SCREEN_HEIGHT && player_y > gap_end)) {
-                return true;
-            }
+                || (player_y < SCREEN_HEIGHT && player_y > gap_end))
+        {
+            return true;
+        }
         false
-    } }
-    
+    }
+}
+
 enum GameMode {
     Menu,
     Playing,
