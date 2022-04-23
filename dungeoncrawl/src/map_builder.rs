@@ -1,10 +1,11 @@
 use crate::prelude::*;
 
-const NUM_ROOMS: usize = 100;
+const NUM_ROOMS: usize = 20;
 
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
+    pub player_start: Point,
 }
 
 impl MapBuilder {
@@ -12,11 +13,13 @@ impl MapBuilder {
         let mut mb = Self {
             map: Map::new(),
             rooms: Vec::new(),
+            player_start: Point::zero(),
         };
 
         mb.fill(TileType::Wall);
         mb.generate_rooms(rng);
         mb.draw_corridors(rng);
+        mb.player_start = mb.rooms[0].center();
 
         mb
     }
