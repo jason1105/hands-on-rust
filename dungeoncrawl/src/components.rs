@@ -13,6 +13,10 @@ pub struct Render {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Player;
 
+/// Enemy
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Enemy;
+
 /// Indicate what character used for rendering
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct EntityGlyph(FontCharType);

@@ -36,15 +36,25 @@ struct State {
 impl State {
     fn new() -> Self {
         let mut ecs = World::default();
+        let mut rng = RandomNumberGenerator::new();
 
         // init resource.
         let mut resources = Resources::default();
-        let (map, player_start) = Self::build_map();
+        let (map, player_start, rooms) = Self::build_map(&mut rng);
         resources.insert(map);
         resources.insert(Camera::new(player_start));
 
-        // add entity
+        // add player
         spawn_player(&mut ecs, player_start);
+
+        // add enemy
+        rooms
+            .iter()
+            .skip(1) // Player is in first room.
+            .map(|rect| rect.center())
+            .for_each(|point| {
+                spawn_enemy(&mut ecs, point, &mut rng);
+            });
 
         Self {
             ecs,
@@ -55,10 +65,9 @@ impl State {
 
     fn reset(&mut self) {}
 
-    fn build_map() -> (Map, Point) {
-        let mut rng = RandomNumberGenerator::new();
-        let map_builder = MapBuilder::new(&mut rng);
-        (map_builder.map, map_builder.player_start)
+    fn build_map(rng: &mut RandomNumberGenerator) -> (Map, Point, Vec<Rect>) {
+        let map_builder = MapBuilder::new(rng);
+        (map_builder.map, map_builder.player_start, map_builder.rooms)
     }
 }
 
