@@ -38,7 +38,8 @@ impl MapBuilder {
                 rng.range(2, 10),                 // height
             );
 
-            let count = self.rooms.iter().filter(|r| r.intersect(&room)).count();
+            let count =
+                self.rooms.iter().filter(|r| r.intersect(&room)).count();
 
             if count == 0 {
                 room.for_each(|p| {
@@ -54,7 +55,7 @@ impl MapBuilder {
 
     fn dig_vertical_tunnel(&mut self, x: i32, y1: i32, y2: i32) {
         use std::cmp::{max, min};
-        for y in min(y1, y2)..max(y1, y2) {
+        for y in min(y1, y2)..=max(y1, y2) {
             if let Some(idx) = self.map.try_index(Point::new(x, y)) {
                 self.map.tiles[Map::map_idx(x, y)] = TileType::Floor;
             }
@@ -63,7 +64,7 @@ impl MapBuilder {
 
     fn dig_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
         use std::cmp::{max, min};
-        for x in min(x1, x2)..max(x1, x2) {
+        for x in min(x1, x2)..=max(x1, x2) {
             if let Some(idx) = self.map.try_index(Point::new(x, y)) {
                 self.map.tiles[Map::map_idx(x, y)] = TileType::Floor;
             }

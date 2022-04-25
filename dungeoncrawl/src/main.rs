@@ -1,15 +1,24 @@
 #![warn(clippy::all, clippy::pedantic)]
 
 mod camera;
+mod components;
 mod map;
 mod map_builder;
 mod player;
+mod spawner;
+mod systems;
 mod prelude {
     pub use crate::camera::*;
+    pub use crate::components::*;
     pub use crate::map::*;
     pub use crate::map_builder::*;
     pub use crate::player::*;
+    pub use crate::spawner::*;
+    pub use crate::systems::*;
     pub use bracket_lib::prelude::*;
+    pub use legion::systems::CommandBuffer;
+    pub use legion::world::SubWorld;
+    pub use legion::*;
     pub const SCREEN_HEIGHT: i32 = 50;
     pub const SCREEN_WIDTH: i32 = 80;
     pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
@@ -19,27 +28,32 @@ mod prelude {
 use prelude::*;
 
 struct State {
-    map: Map,
-    player: Player,
-    camera: Camera,
+    ecs: World,           // context stores all entities and components
+    resources: Resources, // hold resources
+    systems: Schedule,    // hold systems
 }
 
 impl State {
     fn new() -> Self {
+        let mut ecs = World::default();
+
+        // init resource.
+        let mut resources = Resources::default();
         let (map, player_start) = Self::build_map();
+        resources.insert(map);
+        resources.insert(Camera::new(player_start));
+
+        // add entity
+        spawn_player(&mut ecs, player_start);
+
         Self {
-            map: map,
-            player: Player::new(player_start),
-            camera: Camera::new(player_start),
+            ecs,
+            resources,
+            systems: build_scheduler(),
         }
     }
 
-    fn reset(&mut self) {
-        let mut player_start = Point::zero();
-        (self.map, player_start) = Self::build_map();
-        self.player = Player::new(player_start);
-        self.camera = Camera::new(player_start);
-    }
+    fn reset(&mut self) {}
 
     fn build_map() -> (Map, Point) {
         let mut rng = RandomNumberGenerator::new();
@@ -50,18 +64,20 @@ impl State {
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
+        // clear console
         ctx.set_active_console(0);
         ctx.cls();
         ctx.set_active_console(1);
         ctx.cls();
 
-        self.player.update(&mut self.map, ctx, &mut self.camera);
-        self.map.render(ctx, &self.camera);
-        self.player.render(&self.map, ctx, &self.camera);
+        // refresh resource of key input
+        self.resources.insert(ctx.key);
 
-        if let Some(VirtualKeyCode::R) = ctx.key {
-            self.reset();
-        }
+        // execute all systems
+        self.systems.execute(&mut self.ecs, &mut self.resources);
+
+        // flush render buffer
+        render_draw_buffer(ctx).expect("Render error");
     }
 }
 
@@ -72,13 +88,20 @@ fn main() -> BError {
     //     .build()?;
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
-        .with_fps_cap(30.0)
-        .with_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT)
-        .with_tile_dimensions(32, 32)
+        .with_fps_cap(30.0) // 30 frames per minute
+        .with_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT) // window size
+        .with_tile_dimensions(32, 32) // tile size
         .with_resource_path("resources/")
         .with_font("dungeonfont.png", 32, 32) // the size are usually the same as tile dimensions
-        .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
-        .with_simple_console_no_bg(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
+        .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png") // a layer used for drawing map
+        .with_simple_console_no_bg(
+            // a layer used for drawing player
+            DISPLAY_WIDTH,
+            DISPLAY_HEIGHT,
+            "dungeonfont.png",
+        )
         .build()?;
+
+    // main loop
     main_loop(context, State::new())
 }
