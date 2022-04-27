@@ -7,6 +7,7 @@ mod map_builder;
 mod player;
 mod spawner;
 mod systems;
+mod turn_state;
 mod prelude {
     pub use crate::camera::*;
     pub use crate::components::*;
@@ -15,6 +16,7 @@ mod prelude {
     pub use crate::player::*;
     pub use crate::spawner::*;
     pub use crate::systems::*;
+    pub use crate::turn_state::*;
     pub use bracket_lib::prelude::*;
     pub use legion::systems::CommandBuffer;
     pub use legion::world::SubWorld;
@@ -28,9 +30,11 @@ mod prelude {
 use prelude::*;
 
 struct State {
-    ecs: World,           // context stores all entities and components
-    resources: Resources, // hold resources
-    systems: Schedule,    // hold systems
+    ecs: World,               // context stores all entities and components
+    resources: Resources,     // hold resources
+    input_system: Schedule,   // systems
+    player_system: Schedule,  // systems
+    monster_system: Schedule, // systems
 }
 
 impl State {
@@ -43,6 +47,7 @@ impl State {
         let (map, player_start, rooms) = Self::build_map(&mut rng);
         resources.insert(map);
         resources.insert(Camera::new(player_start));
+        resources.insert(TurnState::AwaitingInput); // init turn state
 
         // add player
         spawn_player(&mut ecs, player_start);
@@ -59,7 +64,9 @@ impl State {
         Self {
             ecs,
             resources,
-            systems: build_scheduler(),
+            input_system: build_input_schedule(),
+            player_system: build_player_schedule(),
+            monster_system: build_monster_schedule(),
         }
     }
 
@@ -82,8 +89,19 @@ impl GameState for State {
         // refresh resource of key input
         self.resources.insert(ctx.key);
 
-        // execute all systems
-        self.systems.execute(&mut self.ecs, &mut self.resources);
+        // execute systems
+        let turn_state = self.resources.get::<TurnState>().unwrap().clone(); // Fetch 自动实现 Clone, 因为 TurnState 是Clone
+        let system = match turn_state {
+            TurnState::AwaitingInput => self
+                .input_system
+                .execute(&mut self.ecs, &mut self.resources),
+            TurnState::PlayerTurn => self
+                .player_system
+                .execute(&mut self.ecs, &mut self.resources),
+            TurnState::MonsterTurn => self
+                .monster_system
+                .execute(&mut self.ecs, &mut self.resources),
+        };
 
         // flush render buffer
         render_draw_buffer(ctx).expect("Render error");
