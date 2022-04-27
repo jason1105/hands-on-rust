@@ -17,6 +17,9 @@ pub struct Player;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Enemy;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MovingRandomly;
+
 /// Indicate what character used for rendering
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct EntityGlyph(FontCharType);
