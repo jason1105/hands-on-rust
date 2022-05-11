@@ -23,3 +23,10 @@ pub struct MovingRandomly;
 /// Indicate what character used for rendering
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct EntityGlyph(FontCharType);
+
+/// A message for movement
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct WantsToMove {
+    pub entity: Entity,
+    pub position: Point,
+}

@@ -14,6 +14,9 @@ pub fn collision(ecs: &SubWorld, commands: &mut CommandBuffer) {
             player_pos = *point;
         });
 
+    /*
+    `<(Entity, &Point)>::query()` means query Entity and get reference to it.
+    */
     <(Entity, &Point)>::query()
         .filter(component::<Enemy>())
         .iter(ecs)

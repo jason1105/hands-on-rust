@@ -27,6 +27,7 @@ impl Map {
         ((SCREEN_WIDTH * y) + x) as usize
     }
 
+    /// Get type of tiles.
     pub fn type_on(&self, point: Point) -> Option<TileType> {
         if let Some(idx) = self.try_index(point) {
             Some(self.tiles[idx])
