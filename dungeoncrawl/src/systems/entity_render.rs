@@ -11,6 +11,7 @@ pub fn entity_render(
 ) {
     let mut batch = DrawBatch::new();
 
+    // specify which console be used.
     batch.target(1);
 
     let camera_offset = Point::new(camera.left_x, camera.top_y);

@@ -85,6 +85,8 @@ impl GameState for State {
         ctx.cls();
         ctx.set_active_console(1);
         ctx.cls();
+        ctx.set_active_console(2);
+        ctx.cls();
 
         // refresh resource of key input
         self.resources.insert(ctx.key);
@@ -115,17 +117,24 @@ fn main() -> BError {
     //     .build()?;
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
-        .with_fps_cap(30.0) // 30 frames per minute
+        .with_fps_cap(60.0) // 30 frames per minute
         .with_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT) // window size
         .with_tile_dimensions(32, 32) // tile size
         .with_resource_path("resources/")
         .with_font("dungeonfont.png", 32, 32) // the size are usually the same as tile dimensions
+        .with_font("terminal8x8.png", 8, 8) // the size are usually the same as tile dimensions
         .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png") // a layer used for drawing map
         .with_simple_console_no_bg(
             // a layer used for drawing player
             DISPLAY_WIDTH,
             DISPLAY_HEIGHT,
             "dungeonfont.png",
+        )
+        .with_simple_console_no_bg(
+            // a layer used for drawing player
+            DISPLAY_WIDTH * 4,
+            DISPLAY_HEIGHT * 4,
+            "terminal8x8.png",
         )
         .build()?;
 
