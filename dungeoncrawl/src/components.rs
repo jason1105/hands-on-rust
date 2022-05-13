@@ -31,9 +31,13 @@ pub struct WantsToMove {
     pub position: Point,
 }
 
-/// Health of player
+/// Hip Point
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Health {
     pub current: i32,
     pub max: i32,
 }
+
+/// Name for player or monsters
+#[derive(Debug, Clone, PartialEq)]
+pub struct Name(pub String);

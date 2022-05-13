@@ -23,18 +23,33 @@ pub fn spawn_enemy(
     point: Point,
     rng: &mut RandomNumberGenerator,
 ) {
+    let (health, name, glyph) = match rng.range(1, 10) {
+        1..=8 => goblin(),
+        _ => orc(),
+    };
+
     ecs.push((
         Enemy,
         point,
         Render {
             color: ColorPair::new(WHITE, BLACK),
-            glyph: match rng.range(0, 4) as i32 {
-                0 => to_cp437('E'),
-                1 => to_cp437('O'),
-                2 => to_cp437('o'),
-                _ => to_cp437('g'),
-            },
+            glyph,
+        },
+        Health {
+            current: health,
+            max: health,
         },
         MovingRandomly,
+        Name(name),
     ));
+}
+
+/// Creating monster of goblin
+fn goblin() -> (i32, String, FontCharType) {
+    return (1, "goblin".into(), to_cp437('g'));
+}
+
+/// Creating monster of orc
+fn orc() -> (i32, String, FontCharType) {
+    return (2, "orc".into(), to_cp437('o'));
 }

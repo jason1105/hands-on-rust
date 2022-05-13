@@ -8,6 +8,7 @@ use self::map_render::map_render_system;
 use self::movement::movement_system;
 use self::player_input::player_input_system;
 use self::random_move::random_move_system;
+use self::tooltips::tooltips_system;
 
 mod collisions;
 mod end_turn;
@@ -17,6 +18,7 @@ mod map_render;
 mod movement;
 mod player_input;
 mod random_move;
+mod tooltips;
 
 /// Build systems
 
@@ -27,6 +29,7 @@ pub fn build_input_schedule() -> Schedule {
         .flush()
         .add_system(map_render_system())
         .add_system(entity_render_system())
+        .add_system(tooltips_system())
         .build()
 }
 
@@ -40,6 +43,7 @@ pub fn build_player_schedule() -> Schedule {
         .add_system(map_render_system())
         .add_system(entity_render_system())
         .add_system(end_turn_system())
+        .add_system(tooltips_system())
         .build()
 }
 
@@ -55,5 +59,6 @@ pub fn build_monster_schedule() -> Schedule {
         .add_system(map_render_system())
         .add_system(entity_render_system())
         .add_system(end_turn_system())
+        .add_system(tooltips_system())
         .build()
 }

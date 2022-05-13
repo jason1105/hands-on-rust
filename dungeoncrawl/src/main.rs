@@ -91,6 +91,10 @@ impl GameState for State {
         // refresh resource of key input
         self.resources.insert(ctx.key);
 
+        // monsters on console 0, so we need capture position on console 0
+        ctx.set_active_console(0);
+        self.resources.insert(Point::from_tuple(ctx.mouse_pos()));
+
         // execute systems
         let turn_state = self.resources.get::<TurnState>().unwrap().clone(); // Fetch 自动实现 Clone, 因为 TurnState 是Clone
         let system = match turn_state {
