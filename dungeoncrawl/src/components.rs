@@ -1,50 +1,37 @@
-use crate::prelude::*;
+pub use crate::prelude::*;
 
-/// All components.
-/// Components have data, but have no behaviors
-
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Render {
     pub color: ColorPair,
     pub glyph: FontCharType,
 }
 
-/// Player is a tag component used for identify rule of entity.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Player;
 
-/// Enemy
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Enemy;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MovingRandomly;
 
-/// Indicate what character used for rendering
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct EntityGlyph(FontCharType);
-
-/// A message for movement
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToMove {
     pub entity: Entity,
-    pub position: Point,
+    pub destination: Point,
 }
 
-/// A message for combat
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToAttack {
     pub attacker: Entity,
     pub victim: Entity,
 }
 
-/// Hip Point
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Health {
     pub current: i32,
     pub max: i32,
 }
 
-/// Name for player or monsters
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Name(pub String);

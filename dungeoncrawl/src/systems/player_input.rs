@@ -1,68 +1,59 @@
 use crate::prelude::*;
 
-/// A system for player input
-/// Page 153
 #[system]
-#[write_component(Point)]
+#[read_component(Point)]
 #[read_component(Player)]
 #[read_component(Enemy)]
-#[read_component(Health)]
 pub fn player_input(
-    ecs: &mut SubWorld,
+    ecs: &SubWorld,
+    commands: &mut CommandBuffer,
     #[resource] key: &Option<VirtualKeyCode>,
     #[resource] turn_state: &mut TurnState,
-    commands: &mut CommandBuffer,
 ) {
-    if let Some(key) = key {
+    let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
+    if let Some(key) = *key {
         let delta = match key {
-            VirtualKeyCode::Up => Point::new(0, -1),
-            VirtualKeyCode::Down => Point::new(0, 1),
             VirtualKeyCode::Left => Point::new(-1, 0),
             VirtualKeyCode::Right => Point::new(1, 0),
-            _ => Point::zero(),
+            VirtualKeyCode::Up => Point::new(0, -1),
+            VirtualKeyCode::Down => Point::new(0, 1),
+            _ => Point::new(0, 0),
         };
 
-        // get player entity and new position
-        let (player_entity, player_new_position) = <(Entity, &Point)>::query()
-            .filter(component::<Player>())
+        let (player_entity, destination) = players
             .iter(ecs)
             .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
-            .expect("Error");
+            .unwrap();
 
-        // a flag to indicate whether to attack enemies, will be used later
-        let mut fight = false;
+        let mut enemies =
+            <(Entity, &Point)>::query().filter(component::<Enemy>());
+        if delta.x != 0 || delta.y != 0 {
+            let mut hit_something = false;
+            enemies
+                .iter(ecs)
+                .filter(|(_, pos)| **pos == destination)
+                .for_each(|(entity, _)| {
+                    hit_something = true;
 
-        // fight each enemy if the enemy is at the position where player will move to
-        <(Entity, &Enemy, &Point)>::query()
-            .filter(component::<Health>())
-            .iter(ecs)
-            .for_each(|(monster, _, position)| {
-                if player_new_position == *position {
-                    // player attack monster
                     commands.push((
                         (),
                         WantsToAttack {
                             attacker: player_entity,
-                            victim: *monster,
+                            victim: *entity,
                         },
                     ));
-                    fight = true;
-                }
-            });
+                });
 
-        // move to next position if no enemy was found
-        if !fight {
-            // send a movement message to movement system.
-            commands.push((
-                (),
-                WantsToMove {
-                    entity: player_entity,
-                    position: player_new_position,
-                },
-            ));
+            if !hit_something {
+                commands.push((
+                    (),
+                    WantsToMove {
+                        entity: player_entity,
+                        destination,
+                    },
+                ));
+            }
         }
-
-        // to render something about player
         *turn_state = TurnState::PlayerTurn;
     }
 }
