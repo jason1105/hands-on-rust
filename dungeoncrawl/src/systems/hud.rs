@@ -11,7 +11,10 @@ pub fn hud(ecs: &mut SubWorld) {
         .filter(component::<Player>())
         .iter(ecs)
         .nth(0)
-        .unwrap();
+        .unwrap_or(&Health {
+            current: 0,
+            max: 20,
+        });
 
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);

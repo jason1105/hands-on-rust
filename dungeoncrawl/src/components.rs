@@ -31,6 +31,13 @@ pub struct WantsToMove {
     pub position: Point,
 }
 
+/// A message for combat
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct WantsToAttack {
+    pub attacker: Entity,
+    pub victim: Entity,
+}
+
 /// Hip Point
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Health {

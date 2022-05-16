@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use self::collisions::collision_system;
+use self::combat::combat_system;
 use self::end_turn::end_turn_system;
 use self::entity_render::entity_render_system;
 use self::hud::hud_system;
@@ -10,7 +10,7 @@ use self::player_input::player_input_system;
 use self::random_move::random_move_system;
 use self::tooltips::tooltips_system;
 
-mod collisions;
+mod combat;
 mod end_turn;
 mod entity_render;
 mod hud;
@@ -45,8 +45,7 @@ pub fn build_player_schedule() -> Schedule {
         // process player's movement
         .add_system(movement_system())
         .flush() // flush command buffer
-        // identify collision
-        .add_system(collision_system())
+        .add_system(combat_system())
         .flush()
         // render screen
         .add_system(map_render_system())
@@ -69,8 +68,7 @@ pub fn build_monster_schedule() -> Schedule {
         // process monster's movement
         .add_system(movement_system())
         .flush() // flush command buffer
-        // process collision
-        .add_system(collision_system())
+        .add_system(combat_system())
         .flush()
         // render screen
         .add_system(map_render_system())
